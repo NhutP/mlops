@@ -1,0 +1,134 @@
+- name: Gather facts for Kafka nodes
+  hosts: kafka_brokers
+  gather_facts: yes
+  tasks:
+    - name: Confirm facts
+      meta: noop
+
+
+- name: Gen kafka brokers
+  hosts: localhost
+ 
+  tasks:
+    - name: Build list of kafka brokers
+      set_fact:
+        kafka_brokers_list: "{{ kafka_brokers_list | default([]) + ['PLAINTEXT://%s:%s'|format(hostvars[item]['ansible_default_ipv4']['address'], hostvars[item]['plaintext_port'])]}}"
+      loop: "{{ groups['kafka_brokers'] }}"
+      run_once: true
+
+    - name: Convert list to comma-separated string
+      set_fact:
+        kafka_brokers_list: "{{ kafka_brokers_list | join(',') }}"
+      run_once: true
+
+
+- name: set up schema registry
+  hosts: kafka_schema_registry
+
+  tasks:
+  - name: install
+    ansible.builtin.script: ./script/install_kafka_confluent.sh
+
+  - name: Copy .properties from template
+    vars:
+      listener: "http://0.0.0.0:{{schema_registry_port}}"
+      kafka_bootstrap_servers: "{{hostvars['localhost']['kafka_brokers_list']}}"
+      kafkastore_topic: "_schemas"
+      replication_factor: 2
+      host_name: "{{ansible_default_ipv4.address}}"
+      advertised_listener: "http://{{ansible_default_ipv4.address}}:{{schema_registry_port}}"
+
+    template:
+      src: ./script/kafka_registry.properties.j2
+      dest: ~/confluent-7.9.0/kafka_registry.properties
+      mode: '0644'
+
+  # - name: start schema registry server
+  #   # ansible.builtin.shell: "cd ~/confluent-7.9.0 && ./bin/schema-registry-start ~/confluent-7.9.0/kafka_registry.properties"
+  #   ansible.builtin.shell: "cd ~/confluent-7.9.0 && ./bin/schema-registry-start ~/confluent-7.9.0/kafka_registry.properties > ~/confluent-7.9.0/schema-registry.log 2>&1 &"
+  #   register: log
+
+  - name: Start Schema Registry in the background
+    ansible.builtin.shell: |
+      nohup ~/confluent-7.9.0/bin/schema-registry-start ~/confluent-7.9.0/kafka_registry.properties > ~/confluent-7.9.0/schema-registry.log 2>&1 &
+      echo $! > ~/confluent-7.9.0/schema-registry.pid
+    async: 1
+    poll: 0
+    register: schema_registry_log
+
+
+  - name: deb
+    debug:
+      var: schema_registry_log
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# - name: Gen kafka brokers
+#   hosts: localhost
+ 
+#   tasks:
+#     - name: Build list of kafka brokers
+#       set_fact:
+#         kafka_brokers_list: "{{ kafka_brokers_list | default([]) + ['PLAINTEXT://%s:%s'|format(hostvars[item]['ansible_default_ipv4']['address'], hostvars[item]['plaintext_port'])]}}"
+#       loop: "{{ groups['kafka_brokers'] }}"
+#       run_once: true
+
+#     # - name: Convert list to comma-separated string
+#     #   set_fact:
+#     #     kafka_brokers_list: "{{ kafka_brokers_list | join(',') }}"
+#     #   run_once: true
+
+
+# - name: set up schema registry
+#   hosts: kafka_schema_registry
+
+#   tasks:
+#   - name: install
+#     ansible.builtin.shell: "apt update && apt install -y python3 python3-pip  python3-venv"
+#     become: true
+
+#   - name: install 2
+#     ansible.builtin.shell: "cd ~/confluent-7.9.0 && python3 -m venv ~/confluent-7.9.0/karapace_env && . ~/confluent-7.9.0/karapace_env/bin/activate && [ -d 'karapace' ] || git clone https://github.com/aiven/karapace.git karapace && cd karapace && pip install ."
+
+#   - name: Copy .properties from template
+#     vars:
+#       listener: "http://0.0.0.0:{{schema_registry_port}}"
+#       kafka_bootstrap_servers: "{{hostvars['localhost']['kafka_brokers_list']}}"
+#       kafkastore_topic: "_schemas"
+#       replication_factor: 2
+#       host_name: "{{ansible_default_ipv4.address}}"
+
+#     template:
+#       src: ./script/kafka_schema_registry.json.j2
+#       dest: ~/confluent-7.9.0/kafka_schema_registry.json
+#       mode: '0644'
+
+#   # - name: start schema registry server
+#   #   ansible.builtin.shell: "cd ~/confluent-7.9.0 && ./bin/schema-registry-start ~/confluent-7.9.0/kafka_registry.properties"
+#   #   register: log
+
+#   - name: deb
+#     debug:
+#       var: log

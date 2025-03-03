@@ -1,0 +1,16 @@
+- name: reset standalone postgres_sql cluster
+  hosts: postgres_sql_nodes
+
+  tasks:
+    - name: uninstall
+      ansible.builtin.script: "./script/uninstall.sh"
+      become: true
+
+
+- name: stop ha proxy
+  hosts: haproxy_node
+
+  tasks:
+    - name: uninstall
+      ansible.builtin.shell: "systemctl disable haproxy"
+      become: true

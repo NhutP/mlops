@@ -1,0 +1,101 @@
+- name: Gather facts for Kafka nodes
+  hosts: kafka_nodes
+  gather_facts: yes
+  tasks:
+    - name: install kafka binary
+      ansible.builtin.script: ./script/install_kafka_confluent.sh
+
+
+- name: Gen kafka voting
+  hosts: localhost
+ 
+  tasks:
+    - name: Build list of quorum voters
+      set_fact:
+        kafka_voters_list: "{{ kafka_voters_list | default([]) + ['%s@%s:9093'|format(hostvars[item]['kafka_node_id'], hostvars[item]['ansible_default_ipv4']['address'])] }}"
+      loop: "{{ groups['kafka_voters'] }}" # "{{ groups['kafka_nodes'] }}" 
+      loop_control:
+        index_var: i     # 'i' will start at 0, so we do (i+1) for 1-based indexing
+      run_once: true
+
+    - name: Convert list to comma-separated string
+      set_fact:
+        kafka_controller_quorum_voters: "{{ kafka_voters_list | join(',') }}"
+      run_once: true
+
+
+- name: create server properties file for brokers
+  hosts: kafka_brokers   
+
+  tasks:
+  - name: set kafka_process_roles
+    set_fact:
+      kafka_process_roles: "broker"
+      kafka_log_dirs: "/var/lib/kafka/data"
+      kafka_controller_quorum_voters: "{{hostvars['localhost']['kafka_controller_quorum_voters']}}"
+
+
+  - name: Copy server.properties from template
+    vars:
+      kafka_listeners: "PLAINTEXT://{{ansible_default_ipv4.address}}:{{plaintext_port}}"
+      kafka_advertised_listeners: "PLAINTEXT://{{ansible_default_ipv4.address}}:{{plaintext_port}}"
+      node_id: "{{kafka_node_id}}"
+    template:
+      src: ./script/server.properties_broker.j2
+      dest: ~/confluent-7.9.0/server.properties
+      mode: '0644'
+
+
+- name: create server properties file for voters
+  hosts: kafka_voters
+  
+  tasks:
+  - name: set kafka_process_roles
+    set_fact:
+      kafka_process_roles: "{{ kafka_process_roles | default('', true) + ',' if kafka_process_roles is defined else '' }}controller"
+      kafka_controller_quorum_voters: "{{hostvars['localhost']['kafka_controller_quorum_voters']}}"
+      kafka_log_dirs: "/var/lib/kafka/data"
+      # kafka_num_partitions: 3
+      # kafka_min_insync_replicas: 2
+
+  - name: "Copy server.properties from template"
+    vars:
+      kafka_listeners: "PLAINTEXT://{{ansible_default_ipv4.address}}:{{plaintext_port}},CONTROLLER://{{ansible_default_ipv4.address}}:{{controller_port}}"
+      kafka_advertised_listeners: "PLAINTEXT://{{ansible_default_ipv4.address}}:{{plaintext_port}}"
+      node_id: "{{kafka_node_id}}"
+    template:
+      src: ./script/server.properties_voter.j2
+      dest: ~/confluent-7.9.0/server.properties
+      mode: '0644'
+
+
+- name: set up standalone kafka cluster
+  hosts: kafka_brokers
+  tasks:
+  # - name: gen and save random uuid
+  #   ansible.builtin.shell: "cd ~/confluent-7.9.0 && ./bin/kafka-storage.sh random-uuid"
+  #   register: cluster_id
+  #   run_once: true
+
+  - name: kafka log dir exists
+    stat:
+      path: "{{ kafka_log_dirs }}"
+    register: dir_check
+
+  - name: create kafka data dir
+    ansible.builtin.shell: "mkdir -p {{ kafka_log_dirs }} && sudo chown -R {{username}} {{ kafka_log_dirs }}"
+    become: true
+    when: not dir_check.stat.exists
+
+  - name: start kafka
+    ansible.builtin.shell: "cd ~/confluent-7.9.0 && ./bin/kafka-storage format -t {{cluster_id}} -c ~/confluent-7.9.0/server.properties"
+    when: not dir_check.stat.exists
+
+  - name: start
+    # ansible.builtin.shell: "export KAFKA_HEAP_OPTS='-Xms2G -Xmx4G' && cd ~/confluent-7.9.0 && ./bin/kafka-server-start -daemon ~/confluent-7.9.0/server.properties"
+    ansible.builtin.shell: "export KAFKA_HEAP_OPTS='-Xms1G -Xmx2G' && cd ~/confluent-7.9.0 && nohup ./bin/kafka-server-start ~/confluent-7.9.0/server.properties > kafka.log 2>&1 &"
+    register: log
+
+  - name: templ
+    debug:
+      msg: "{{log.stdout}}"

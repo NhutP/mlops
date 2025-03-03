@@ -1,0 +1,36 @@
+- name: ttt
+  hosts: k8s_nodes
+
+  tasks:
+  - name: yyy
+    vars:
+      test_var: hahaha2
+    debug:
+      msg: "{{test_var}} and {{hostvars[inventory_hostname]['test_var']}}"
+      
+  - name: asdkjlasdlkjasdlk
+    set_fact:
+      test_var: hahaha3
+  
+  - name: yyy2
+    vars:
+      test_var: hahaha2
+    debug:
+      msg: "{{test_var}} and {{hostvars[inventory_hostname]['test_var']}}"
+  
+  
+
+  - name: kkk2
+    set_fact:
+      test_var: hahaha6
+
+  - name: kkkkk
+    ansible.builtin.shell: "echo hahaha4"
+    register: test_var
+    
+  - name: yyy3
+    vars:
+      test_var: hahaha5
+    debug:
+      msg: "{{test_var}} and {{hostvars[inventory_hostname]['test_var']}}"
+  

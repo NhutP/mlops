@@ -1,0 +1,82 @@
+- name: setup spark standalone
+  hosts: spark_nodes
+
+  tasks:
+    # - name: install spark
+    #   copy:
+    #     src: ./script/spark-3.5.4-bin-hadoop3.tgz
+    #     dest: /tmp/spark-3.5.4-bin-hadoop3.tgz
+    #     mode: '0644'
+    
+    # - name: unzip
+    #   ansible.builtin.shell: "cd ~ && tar -xzf spark-3.5.4-bin-hadoop3.tgz"
+
+    - name: install spark
+      ansible.builtin.script: ./script/install.sh
+
+
+- name: Ensure Java is Installed
+  hosts: spark_nodes
+  become: yes
+  tasks:
+    - name: Check if Java is installed
+      command: java -version
+      register: java_check
+      ignore_errors: yes
+      
+    - name: install java if not available
+      block:
+      - name: Install OpenJDK if Java is not installed (Ubuntu/Debian)
+        ansible.builtin.shell: "sudo apt update && sudo apt install openjdk-11-jdk -y"
+
+      - name: Find Java installation path
+        shell: readlink -f $(which java) | xargs dirname | xargs dirname
+        register: java_path
+
+      - name: Set JAVA_HOME in /etc/environment
+        lineinfile:
+          path: /etc/environment
+          line: 'JAVA_HOME={{ java_path.stdout }}'
+          create: yes
+
+      - name: Apply environment changes
+        shell: source /etc/environment
+        args:
+          executable: /bin/bash
+
+      - name: Verify Java installation
+        command: java -version
+        register: java_final_check
+        changed_when: false
+
+      - debug:
+          msg: "Java is successfully installed at {{ java_path.stdout }}"
+      when: java_check.rc != 0
+
+
+- name: setup spark master
+  hosts: spark_masters
+  # become: true
+  tasks:
+    - name: start master
+      ansible.builtin.shell: "cd ~/spark-3.5.4-bin-hadoop3 && ./sbin/start-master.sh --host {{ ansible_default_ipv4.address }} --port 7777 --webui-port 8080"
+
+    - name: get master ip
+      # run_once: true
+      # delegate_to: spark_workers
+      # delegate_facts: true
+      set_fact: 
+        spark_master_ip: "{{ansible_default_ipv4.address}}"
+
+
+- name: setup spark worker
+  hosts: spark_workers
+  # become: true
+  tasks:
+    - name:
+      ansible.builtin.shell: "cd ~/spark-3.5.4-bin-hadoop3 && ./sbin/start-worker.sh spark://{{hostvars[groups['spark_masters'][0]].ansible_default_ipv4.address}}:7777  --host {{ ansible_default_ipv4.address }} --port 7778 --webui-port 8081 --cores {{cores}} --memory {{mem}}"
+      register: output_file
+    
+    - name: out outfile location
+      debug:
+        var: output_file.stdout

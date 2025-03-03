@@ -1,0 +1,7 @@
+- name: Install k8s
+  hosts: k8s_nodes
+  become: true
+  tasks:
+
+  - name: Install k8s on node
+    ansible.builtin.script: ./script/k8s_install.sh

@@ -1,0 +1,14 @@
+- name: setup spark master
+  hosts: spark_masters
+  # become: true
+  tasks:
+    - name: start master
+      ansible.builtin.shell: "cd ~/spark-3.5.4-bin-hadoop3 && ./sbin/stop-master.sh"
+      
+      
+- name: setup spark worker
+  hosts: spark_workers
+  # become: true
+  tasks:
+    - name:
+      ansible.builtin.shell: "cd ~/spark-3.5.4-bin-hadoop3 && ./sbin/stop-worker.sh"

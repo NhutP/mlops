@@ -1,0 +1,82 @@
+- name: get fact
+  hosts: postgres_sql_nodes
+  gather_facts: yes
+  tasks:
+    - name: Confirm facts
+      meta: noop
+
+
+- name: get infor
+  hosts: localhost
+
+  tasks:
+    - name: Build list nodes
+      set_fact:
+        initial_cluster: "{{ initial_cluster | default([]) + ['%s=http://%s:%s'|format(hostvars[item]['ansible_hostname'], hostvars[item]['ansible_default_ipv4']['address'], '2380')] }}"
+      loop: "{{ groups['db_nodes'] }}"
+      run_once: true
+
+    - name: Convert list to comma-separated string
+      set_fact:
+        initial_cluster: "{{ initial_cluster | join(',') }}"
+      run_once: true
+
+    - name: Build node ip list
+      set_fact:
+        ip_list: "{{ ip_list| default([]) + ['%s'|format(hostvars[item]['ansible_default_ipv4']['address'])] }}"
+      loop: "{{ groups['db_nodes'] }}"
+      run_once: true 
+
+
+- name: setup standalone postgres_sql cluster
+  hosts: postgres_sql_nodes
+
+  tasks:
+    - name: install package script
+      vars:
+        node_ip: "{{ansible_default_ipv4.address}}"
+      template:
+        src: ./script/install.sh.j2
+        dest: /tmp/install_percona.sh
+        mode: '0644'
+      become: true
+
+    - name: Copy etcd config file from template
+      vars:
+        node_name: "{{ansible_hostname}}"
+        initial_cluster: "{{hostvars['localhost']['initial_cluster']}}"
+        initial_advertise_peer_urls: "http://{{ansible_default_ipv4.address}}:2380"
+        listen_peer_urls: "http://{{ansible_default_ipv4.address}}:2380"
+        advertise_client_urls: "http://{{ansible_default_ipv4.address}}:2379"
+        listen_client_urls: "http://{{ansible_default_ipv4.address}}:2379"
+      template:
+        src: ./script/etcd.conf.yaml.j2
+        dest: /tmp/etcd.conf.yaml
+        mode: '0644'
+    
+    - name: execute install
+      block:
+      - name: permission
+        ansible.builtin.shell: "chmod +x /tmp/install_percona.sh"
+        become: true
+      - name: execute
+        ansible.builtin.shell: "yes | /tmp/install_percona.sh"
+        become: true
+    
+
+- name: setup ha proxy
+  hosts: haproxy_node  
+
+  tasks:
+
+  - name: Copy ha proxy conf from template
+    vars:
+      ip_list: "{{hostvars['localhost']['ip_list']}}"
+    template:
+      src: ./script/haproxy.cfg.j2
+      dest: /tmp/haproxy.cfg
+      mode: '0644'
+  
+  - name: start ha proxy
+    ansible.builtin.shell: "apt install -y percona-haproxy && mv /tmp/haproxy.cfg /etc/haproxy && sudo systemctl restart haproxy"
+    become: true

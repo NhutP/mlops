@@ -1,0 +1,21 @@
+node.id={{ kafka_node_id }}
+process.roles={{ kafka_process_roles }}
+
+controller.quorum.voters={{ kafka_controller_quorum_voters }}
+listeners={{ kafka_listeners }}
+listener.security.protocol.map=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+controller.listener.names=CONTROLLER
+advertised.listeners={{kafka_advertised_listeners}}
+
+log.dirs={{ kafka_log_dirs }}
+
+
+num.partitions={{ kafka_num_partitions }}
+min.insync.replicas={{ kafka_min_insync_replicas }}
+
+
+# THIS LINE IS VERY IMPORTANT, WITHOUT IT SCHEMA REGISTRY SERVER CAUSE ERROR
+offsets.topic.replication.factor={{offsets_topic_replication_factor}}
+
+
+confluent.telemetry.enabled=false

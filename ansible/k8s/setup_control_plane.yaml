@@ -1,0 +1,40 @@
+- name: setup control plane
+  hosts: first_node
+  become: true
+  vars_files: 
+  - ./secret/secret_var.yaml
+
+  tasks:
+  - name: init
+    ansible.builtin.shell: "kubeadm init --control-plane-endpoint {{ hostvars[item]['ansible_host'] }}:{{ hostvars[item]['kube_port'] }} --upload-certs"
+    loop: "{{ groups['first_node'] }}"
+ 
+  - name: set up folder
+    ansible.builtin.shell: "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config"   #&& export KUBECONFIG=/etc/kubernetes/admin.conf
+
+  - name: apply CNI
+    ansible.builtin.shell: "kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml"
+
+  - name: install helm
+    ansible.builtin.shell: "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && chmod 700 get_helm.sh && ./get_helm.sh"
+
+  - name: get join command
+    ansible.builtin.shell: "kubeadm token create --print-join-command"
+    register: kubeadm_join_cmd
+
+  # - name: show joint command
+  #   debug:
+  #     var: kubeadm_join_cmd.stdout
+
+  - name: save join command
+    # lineinfile:
+    #   path: /mnt/c/Users/quang/Desktop/project/ansible/k8s/script/join_worker.sh
+    #   line: "{{kubeadm_join_cmd.stdout}}"
+    #   create: yes
+    copy:
+      content: "{{ kubeadm_join_cmd.stdout }}"
+      dest: /mnt/c/Users/quang/Desktop/project/ansible/k8s/script/join_worker.sh
+
+    delegate_to: localhost
+    run_once: true
+    become: false

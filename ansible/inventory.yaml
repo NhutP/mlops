@@ -1,0 +1,146 @@
+all:  
+  children:
+    strong_machine:
+      hosts:
+        machine1:
+          ansible_host: 192.168.1.111
+        machine2:
+          ansible_host: 192.168.1.112
+        machine3:
+          ansible_host: 192.168.1.114
+        machine4: 
+          ansible_host: 192.168.1.116
+
+      vars:
+        ansible_ssh_private_key_file: /home/nhutpham/.ssh/worker_key
+        ansible_user: nhut
+        
+    weak_machine:
+      hosts:
+        master_machine:
+          ansible_host: 192.168.1.110
+      vars:
+        ansible_ssh_private_key_file: /home/nhutpham/.ssh/master_key
+        ansible_user: nhut
+
+  hosts:
+    localhost:
+      ansible_connection: local
+      
+  vars:
+    username: nhut
+
+###########################################################
+k8s_nodes:  
+  children:
+    worker_nodes:
+      hosts:
+        machine1:
+        machine2:
+        # machine4:
+        
+    master_nodes:
+      children:
+        first_node:
+          hosts:
+            master_machine:
+              kube_port: 6443
+
+##############################################################
+spark_nodes:
+  children:
+    spark_masters:
+      hosts:
+        master_machine:
+
+    spark_workers:
+      hosts:
+        machine1:
+        machine4:
+      vars:
+        cores: 1
+        mem: 2G
+
+##############################################################
+kafka_nodes:
+  children:
+    kafka_cluster_nodes:
+      hosts:
+        machine1:
+          kafka_node_id: 1
+        master_machine:
+          kafka_node_id: 999
+        # machine2:
+        #   kafka_node_id: 2
+        machine4:
+          kafka_node_id: 4
+      vars:
+        cluster_id: OJeaqawXR7GAoFeTu6-FhA
+        kafka_num_partitions: 2
+        kafka_min_insync_replicas: 1
+        offsets_topic_replication_factor: 2
+
+    kafka_brokers:
+      hosts:
+        machine1:
+        master_machine:
+        machine4:
+      vars:
+        plaintext_port: 9092
+        
+    kafka_voters:
+      hosts:
+        machine1:
+        master_machine:
+      vars: 
+        controller_port: 9093
+
+    kafka_schema_registry:
+      hosts:
+        master_machine:
+        # machine1:
+      vars:
+        schema_registry_port: 8081
+        schema_registry_cluster_id: 12345678
+
+#####################################################
+postgres_sql_nodes:
+  hosts:
+    machine1:
+    master_machine:
+  
+  children:
+    etcd_nodes:
+      hosts:
+        machine1:
+        master_machine:
+    
+    db_nodes:
+      hosts:
+        machine1:
+        master_machine:
+    
+    haproxy_node:
+      hosts:
+        master_machine:
+
+#####################################################
+redis_cluster_nodes:
+  children:
+    redis_cluster_master_nodes:
+      hosts:
+        master_machine:
+        machine1:
+        machine2:
+      vars:
+        redis_master_port: 7777
+
+    redis_cluster_replica_nodes:
+      hosts:
+        master_machine:
+        machine1:
+        machine2:
+      vars:
+        redis_replica_port: 7778
+  vars:
+    replica_factor: 1

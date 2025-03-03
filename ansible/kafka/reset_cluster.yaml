@@ -1,0 +1,21 @@
+- name: stop schema registry
+  hosts: kafka_schema_registry
+  
+  tasks:
+  - name: stop schema registry
+    ansible.builtin.shell: " pkill -f schema-registry"
+    ignore_errors: yes
+
+
+- name: reset kafka
+  hosts: kafka_brokers
+  
+  tasks:
+  # - name: remove meta folder
+  #   ansible.builtin.shell: "rm -r /var/lib/kafka/data"
+  #   become: true
+  #   ignore_errors: yes
+  
+  - name: kafka stop server
+    ansible.builtin.shell: "cd ~/confluent-7.9.0 && ./bin/kafka-server-stop"
+    ignore_errors: yes

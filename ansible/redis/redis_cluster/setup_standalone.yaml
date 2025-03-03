@@ -1,0 +1,81 @@
+- name: install redis
+  hosts: redis_cluster_nodes
+
+  tasks:
+  - name: install redis server
+    ansible.builtin.script: "./script/install_redis_server.sh"
+    become: true
+
+  - name: create config folder
+    ansible.builtin.shell: "rm -rf ~/redis_config && mkdir -p ~/redis_config"
+  
+  - name: config
+    ansible.builtin.shell: "sysctl vm.overcommit_memory=1 && apt update && apt install redis-tools -y"
+    become: true
+
+
+- name: setup config for master
+  hosts: redis_cluster_master_nodes
+  
+  vars:
+    redis_port: "{{redis_master_port}}"
+    hostname: "{{ansible_hostname}}"
+    log_file: "/home/{{ ansible_user | default(ansible_ssh_user, true) }}/redis_config/redis_master_{{hostname}}_{{redis_port}}.log"
+  tasks:
+  - name: "Copy config file from template"
+    template:
+      src: ./script/redis.conf.j2
+      dest: "~/redis_config/redis_{{hostname}}_master_{{redis_port}}.conf"
+      mode: '0644'
+  
+  - name: "start redis server"
+    ansible.builtin.shell: "redis-server ~/redis_config/redis_{{hostname}}_master_{{redis_port}}.conf"
+    
+
+- name: setup config for replica
+  hosts: redis_cluster_replica_nodes
+  
+  vars:
+    redis_port: "{{redis_replica_port}}"
+    hostname: "{{ansible_hostname}}"
+    log_file: "/home/{{ ansible_user | default(ansible_ssh_user, true) }}/redis_config/redis_replica_{{hostname}}_{{redis_port}}.log"
+  tasks:
+  - name: "Copy config file from template"
+    
+    template:
+      src: ./script/redis.conf.j2
+      dest: "~/redis_config/redis_{{hostname}}_replica_{{redis_port}}.conf"
+      mode: '0644'
+
+  - name: "start redis server"
+    ansible.builtin.shell: "redis-server ~/redis_config/redis_{{hostname}}_replica_{{redis_port}}.conf"
+    
+
+- name: Gen cluster info
+  hosts: localhost
+ 
+  tasks:
+    - name: Build list of master
+      set_fact:
+        redis_master_list: "{{ redis_master_list | default([]) + ['%s:%s'|format(hostvars[item]['ansible_default_ipv4']['address'], hostvars[item]['redis_master_port'])] }}"
+      loop: "{{ groups['redis_cluster_master_nodes'] }}"
+      run_once: true
+
+    - name: Build list of replica
+      set_fact:
+        redis_replica_list: "{{ redis_replica_list | default([]) + ['%s:%s'|format(hostvars[item]['ansible_default_ipv4']['address'], hostvars[item]['redis_replica_port'])] }}"
+      loop: "{{ groups['redis_cluster_replica_nodes'] }}"
+      run_once: true
+
+    - name: Convert list to string
+      set_fact:
+        redis_master_list: "{{ redis_master_list | join(' ') }}"
+        redis_replica_list: "{{ redis_replica_list | join(' ') }}"
+      run_once: true
+
+    - name: start redis server
+      ansible.builtin.shell: "redis-cli --cluster create {{redis_master_list}} {{redis_replica_list}} --cluster-replicas {{hostvars[groups['redis_cluster_nodes'][0]]['replica_factor']}}"
+      args:
+        stdin: "yes"
+      run_once: true
+      delegate_to: "{{ groups['redis_cluster_master_nodes'][0] }}"

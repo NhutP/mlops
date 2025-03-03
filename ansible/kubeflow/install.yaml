@@ -1,0 +1,50 @@
+- name: setup kubeflow components
+  hosts: first_node
+  become: true
+
+  tasks:
+  
+  - name: katib
+    block:
+      - name: "install katib"
+        ansible.builtin.shell: "kubectl apply -k github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.17.0"
+  
+  - name: kubeflow pipeline
+    vars:
+      PIPELINE_VERSION : "2.3.0"
+    block: 
+      - name: "apply 1"
+        ansible.builtin.shell: "kubectl apply -k github.com/kubeflow/pipelines/manifests/kustomize/cluster-scoped-resources?ref={{PIPELINE_VERSION}}"
+
+      - name: "wait"
+        ansible.builtin.shell: "kubectl wait --for condition=established --timeout=60s crd/applications.app.k8s.io --warnings-as-errors"
+
+      - name: "apply 2" 
+        ansible.builtin.shell: "kubectl apply -k github.com/kubeflow/pipelines/manifests/kustomize/env/dev?ref={{PIPELINE_VERSION}}"
+
+  - name: model registry
+    block: 
+      - name: "apply 1"
+        ansible.builtin.shell: "kubectl apply -k https://github.com/kubeflow/model-registry/manifests/kustomize/overlays/db?ref=v0.2.10"
+      # - name: "wait and apply 2" 
+      #   ansible.builtin.shell: "kubectl apply -k https://github.com/kubeflow/model-registry/manifests/kustomize/options/csi?ref=v0.2.10"
+
+  # - name: kubeflow trainer v2
+  #   block: 
+  #     - name: "apply 1"
+  #       ansible.builtin.shell: "kubectl apply --server-side -k https://github.com/kubeflow/trainer.git/manifests/overlays/manager?ref=master"
+  #     - name: "wait 1"
+  #       ansible.builtin.shell: "kubectl wait pod -l control-plane=controller-manager,pod-template-hash=b8bf74b85 --namespace kubeflow-system --for=condition=Ready --timeout=3000s --warnings-as-errors"
+  #     - name: "wait 2" 
+  #       ansible.builtin.shell: "kubectl wait pod -l app.kubernetes.io/component=manager,app.kubernetes.io/name=trainer,app.kubernetes.io/part-of=kubeflow,pod-template-hash=589b86f4c6 --for=condition=Ready --namespace kubeflow-system --timeout=3000s --warnings-as-errors"
+  #     - name: "apply "
+  #       ansible.builtin.shell: "kubectl apply --server-side -k https://github.com/kubeflow/trainer.git/manifests/overlays/runtimes?ref=master"
+
+
+  - name: kubeflow trainer v1
+    block: 
+      - name: "apply"
+        ansible.builtin.shell: "kubectl apply --server-side -k github.com/kubeflow/training-operator.git/manifests/overlays/standalone?ref=v1.8.1"
+  
+  - name: install spark-operator
+    ansible.builtin.shell: "helm repo add spark-operator https://kubeflow.github.io/spark-operator && helm repo updatehelm install spark-operator spark-operator/spark-operator --namespace spark-operator --create-namespace"

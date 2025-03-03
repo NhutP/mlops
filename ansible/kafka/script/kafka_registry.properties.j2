@@ -1,0 +1,21 @@
+# Each node listens on port 8081 for API requests
+listeners={{listener}}
+
+# Connect to Kafka brokers for schema storage & leader election
+kafkastore.bootstrap.servers={{kafka_bootstrap_servers}}
+
+# Use the _schemas topic in Kafka to store schema definitions
+kafkastore.topic={{kafkastore_topic}}
+kafkastore.topic.replication.factor={{replication_factor}}
+
+# Each node gets a unique hostname
+# host.name={{host_name}}
+schema.registry.advertised.listeners={{advertised_listener}}
+
+# All Schema Registry nodes belong to the same cluster group
+kafkastore.group.id={{schema_registry_cluster_id}}
+# schema.registry.group.id={{schema_registry_cluster_id}}
+
+# Enable leader election
+leader.eligibility=true
+

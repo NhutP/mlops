@@ -1,0 +1,11 @@
+- name: reset redis cluster
+  hosts: redis_cluster_nodes
+
+  tasks:
+  - name: "stop"
+    ansible.builtin.shell: "redis-cli -p {{redis_master_port}} FLUSHALL && redis-cli -p {{redis_replica_port}} FLUSHALL && redis-cli -c -p {{redis_master_port}} CLUSTER RESET HARD && redis-cli -c -p {{redis_replica_port}} CLUSTER RESET HARD && redis-cli -c -p {{redis_replica_port}} shutdown && redis-cli -c -p {{redis_master_port}} shutdown"
+    ignore_errors: true
+
+  - name: "uninstall"
+    ansible.builtin.shell: "apt-get purge -y redis && rm -f /etc/apt/sources.list.d/redis.list && rm -f /usr/share/keyrings/redis-archive-keyring.gpg && apt-get update -y && rm -rf /etc/redis /var/lib/redis /var/log/redis"
+    become: true
