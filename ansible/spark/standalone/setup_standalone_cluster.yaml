@@ -1,0 +1,38 @@
+- name: setup spark standalone
+  hosts: spark_nodes
+
+  tasks:
+    - name: install spark
+      ansible.builtin.script: ./script/install.sh
+
+    - name: Java install      
+      import_role:
+        name: install_java
+      become: yes
+
+- name: setup spark master
+  hosts: spark_masters
+  # become: true
+  tasks:
+    - name: start master
+      ansible.builtin.shell: "cd ~/spark-3.5.5-bin-hadoop3 && ./sbin/start-master.sh --host {{ ansible_default_ipv4.address }} --port 7777 --webui-port 8080"
+
+    - name: get master ip
+      # run_once: true
+      # delegate_to: spark_workers
+      # delegate_facts: true
+      set_fact: 
+        spark_master_ip: "{{ansible_default_ipv4.address}}"
+
+
+- name: setup spark worker
+  hosts: spark_workers
+  # become: true
+  tasks:
+    - name:
+      ansible.builtin.shell: "cd ~/spark-3.5.5-bin-hadoop3 && ./sbin/start-worker.sh spark://{{hostvars[groups['spark_masters'][0]].ansible_default_ipv4.address}}:7777  --host {{ ansible_default_ipv4.address }} --port 7778 --webui-port 8081 --cores {{cores}} --memory {{mem}}"
+      register: output_file
+    
+    - name: out outfile location
+      debug:
+        var: output_file.stdout

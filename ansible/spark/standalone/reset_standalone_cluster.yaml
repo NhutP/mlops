@@ -3,7 +3,7 @@
   # become: true
   tasks:
     - name: start master
-      ansible.builtin.shell: "cd ~/spark-3.5.4-bin-hadoop3 && ./sbin/stop-master.sh"
+      ansible.builtin.shell: "cd ~/spark-3.5.5-bin-hadoop3 && ./sbin/stop-master.sh"
       
       
 - name: setup spark worker
@@ -11,4 +11,4 @@
   # become: true
   tasks:
     - name:
-      ansible.builtin.shell: "cd ~/spark-3.5.4-bin-hadoop3 && ./sbin/stop-worker.sh"
+      ansible.builtin.shell: "cd ~/spark-3.5.5-bin-hadoop3 && ./sbin/stop-worker.sh"

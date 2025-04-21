@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd ~
-URL="https://dlcdn.apache.org/spark/spark-3.5.4/spark-3.5.4-bin-hadoop3.tgz"
+URL="https://dlcdn.apache.org/spark/spark-3.5.5/spark-3.5.5-bin-hadoop3.tgz"
 FILENAME=$(basename "$URL")
 DIRNAME="${FILENAME%.tgz}"  # Remove .tgz extension to get directory name
 

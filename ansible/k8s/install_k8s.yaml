@@ -3,5 +3,15 @@
   become: true
   tasks:
 
-  - name: Install k8s on node
-    ansible.builtin.script: ./script/k8s_install.sh
+    - name: Check if kubeadm is already installed
+      ansible.builtin.command: which kubeadm
+      register: kubeadm_check
+      ignore_errors: true
+
+    - name: Debug kubeadm check result (optional)
+      ansible.builtin.debug:
+        var: kubeadm_check.rc
+
+    - name: Install k8s on node if kubeadm is not found
+      ansible.builtin.script: ./script/k8s_install.sh
+      when: kubeadm_check.rc != 0

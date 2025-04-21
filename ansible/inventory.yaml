@@ -35,16 +35,20 @@ k8s_nodes:
   children:
     worker_nodes:
       hosts:
-        machine1:
-        machine2:
-        # machine4:
-        
+        # machine1:
+        machine3:
+        machine4:
+
     master_nodes:
+      hosts:
+    #     machine1:
+
       children:
         first_node:
           hosts:
             master_machine:
               kube_port: 6443
+              etcd_data_dir: "/var/lib/etcd_k8s"
 
 ##############################################################
 spark_nodes:
@@ -55,11 +59,11 @@ spark_nodes:
 
     spark_workers:
       hosts:
-        machine1:
+        machine3:
         machine4:
       vars:
         cores: 1
-        mem: 2G
+        mem: 3G
 
 ##############################################################
 kafka_nodes:
@@ -70,10 +74,9 @@ kafka_nodes:
           kafka_node_id: 1
         master_machine:
           kafka_node_id: 999
-        # machine2:
-        #   kafka_node_id: 2
-        machine4:
-          kafka_node_id: 4
+        machine3:
+          kafka_node_id: 3
+
       vars:
         cluster_id: OJeaqawXR7GAoFeTu6-FhA
         kafka_num_partitions: 2
@@ -84,7 +87,7 @@ kafka_nodes:
       hosts:
         machine1:
         master_machine:
-        machine4:
+        machine3:
       vars:
         plaintext_port: 9092
         
@@ -105,21 +108,22 @@ kafka_nodes:
 
 #####################################################
 postgres_sql_nodes:
-  hosts:
-    machine1:
-    master_machine:
-  
+  # hosts:
+  #   machine4:
+  #   master_machine:
+  #   machine3:
+
   children:
-    etcd_nodes:
-      hosts:
-        machine1:
-        master_machine:
+    # etcd_nodes:
+    #   hosts:
+    #     machine4:
+    #     machine3:
     
     db_nodes:
       hosts:
-        machine1:
-        master_machine:
-    
+        machine4:
+        machine3:
+        # master_machine:
     haproxy_node:
       hosts:
         master_machine:
@@ -144,3 +148,16 @@ redis_cluster_nodes:
         redis_replica_port: 7778
   vars:
     replica_factor: 1
+
+######
+nfs_nodes:
+  children:
+    nfs_server:
+      hosts:
+        machine3:
+
+    nfs_clients:
+      hosts:
+        master_machine:
+        machine1:
+        machine4:

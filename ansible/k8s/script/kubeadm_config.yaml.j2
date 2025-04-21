@@ -1,0 +1,6 @@
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+etcd:
+  local:
+    dataDir: {{etcd_data_dir}} # Change etcd storage location
+controlPlaneEndpoint: {{controlplane_endpoint}}

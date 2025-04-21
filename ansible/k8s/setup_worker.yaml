@@ -1,7 +1,0 @@
-- name: join as worker
-  hosts: worker_nodes
-  become: true
-
-  tasks: 
-  - name: join
-    ansible.builtin.script: "./script/join_worker.sh"

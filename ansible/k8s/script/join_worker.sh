@@ -1,1 +1,1 @@
-kubeadm join 192.168.1.110:6443 --token yulmsi.jg26yynwf3qxnwjp --discovery-token-ca-cert-hash sha256:f7926fb5f71db52b8dd3c26b4e4ec906e64093e950dda3a424327ed7be361df0 
+kubeadm join 192.168.1.110:6443 --token p169p4.ib0heav0fvkbx3pl --discovery-token-ca-cert-hash sha256:eae4ad2197adb58f1b2df3682621119cbabf6f4069328e95b7db2d51289496a7 

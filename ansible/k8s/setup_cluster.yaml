@@ -1,0 +1,100 @@
+- name: setup control plane
+  hosts: first_node
+  become: true
+  vars_files: 
+  - ./secret/secret_var.yaml
+
+  tasks:
+  - name: copy kubeadm template
+    vars: 
+      controlplane_endpoint: "{{ansible_default_ipv4.address}}:{{kube_port}}"
+    template:
+      src: ./script/kubeadm_config.yaml.j2
+      dest: ~/kubeadm_config.yaml
+      mode: '0644'
+
+  - name: init
+    ansible.builtin.shell: "cd ~ && kubeadm init --config=kubeadm_config.yaml --upload-certs"
+    loop: "{{ groups['first_node'] }}"
+ 
+  - name: set up folder
+    ansible.builtin.shell: "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config"   #&& export KUBECONFIG=/etc/kubernetes/admin.conf
+
+  - name: apply CNI
+    ansible.builtin.shell: "kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml"
+
+  - name: install helm
+    ansible.builtin.shell: "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && chmod 700 get_helm.sh && ./get_helm.sh"
+
+  - name: get join command
+    ansible.builtin.shell: "kubeadm token create --print-join-command"
+    register: kubeadm_join_cmd
+
+  - name: save worker join command
+    copy:
+      content: "{{ kubeadm_join_cmd.stdout }}"
+      dest: /mnt/c/Users/quang/Desktop/project/ansible/k8s/script/join_worker.sh
+    delegate_to: localhost
+    run_once: true
+    become: false
+
+  - name: generate shared cert for masters
+    ansible.builtin.shell: kubeadm init phase upload-certs --upload-certs | grep -A 1 'Using certificate key:' | tail -n 1
+    register: master_cert
+
+  - name: save master join command
+    copy:
+      content: "{{ kubeadm_join_cmd.stdout }} --control-plane --certificate-key {{master_cert.stdout}}"
+      dest: /mnt/c/Users/quang/Desktop/project/ansible/k8s/script/join_master.sh
+    delegate_to: localhost
+    run_once: true
+    become: false
+
+
+- name: join as master
+  hosts: master_nodes
+  become: true
+
+  tasks: 
+  - name: Get intersection of master
+    set_fact:
+      common_hosts: "{{ groups['first_node'] | intersect(groups['master_nodes']) }}"
+
+  - name: join
+    ansible.builtin.script: "./script/join_master.sh"
+    when: inventory_hostname not in common_hosts
+
+  - name: create folder
+    ansible.builtin.shell: "mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && chown $(id -u):$(id -g) $HOME/.kube/config"
+    when: inventory_hostname not in common_hosts
+  
+
+- name: Join workers
+  hosts: worker_nodes
+  become: yes
+
+  tasks:
+    - name: Get intersection of worker and master groups
+      set_fact:
+        common_hosts: "{{ groups['worker_nodes'] | intersect(groups['master_nodes']) }}"
+
+    - name: join as worker (Only Worker Nodes)
+      ansible.builtin.script: "./script/join_worker.sh"
+      when: inventory_hostname not in common_hosts
+
+    - name: untaint nodes (Worker + Master Nodes)
+      ansible.builtin.shell: "kubectl taint nodes {{ hostvars[item]['ansible_hostname'] }} node-role.kubernetes.io/control-plane:NoSchedule-"
+      when: inventory_hostname in common_hosts
+      loop: "{{ common_hosts }}"
+      run_once: yes
+      delegate_to: master_machine
+
+
+- name: Install additional components
+  hosts: master_nodes
+  become: yes
+
+  tasks:
+    - name: install NFS driver
+      ansible.builtin.shell: "curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.11.0/deploy/install-driver.sh | bash -s v4.11.0 --"
+      run_once: yes

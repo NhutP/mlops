@@ -1,6 +1,7 @@
 - name: Gather facts for Kafka nodes
   hosts: kafka_nodes
   gather_facts: yes
+
   tasks:
     - name: install kafka binary
       ansible.builtin.script: ./script/install_kafka_confluent.sh
@@ -55,9 +56,7 @@
       kafka_process_roles: "{{ kafka_process_roles | default('', true) + ',' if kafka_process_roles is defined else '' }}controller"
       kafka_controller_quorum_voters: "{{hostvars['localhost']['kafka_controller_quorum_voters']}}"
       kafka_log_dirs: "/var/lib/kafka/data"
-      # kafka_num_partitions: 3
-      # kafka_min_insync_replicas: 2
-
+      
   - name: "Copy server.properties from template"
     vars:
       kafka_listeners: "PLAINTEXT://{{ansible_default_ipv4.address}}:{{plaintext_port}},CONTROLLER://{{ansible_default_ipv4.address}}:{{controller_port}}"
@@ -67,6 +66,16 @@
       src: ./script/server.properties_voter.j2
       dest: ~/confluent-7.9.0/server.properties
       mode: '0644'
+
+
+- name: Ensure Java is Installed
+  hosts: kafka_nodes
+  become: yes
+  
+  tasks:
+  - name: Install Java using a role
+    import_role:
+      name: install_java
 
 
 - name: set up standalone kafka cluster

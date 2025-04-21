@@ -6,7 +6,7 @@
 # installed by your setup script. It also cleans up configuration files
 # and systemd services.
 
-set -e
+# set -e
 
 echo "Stopping and disabling services..."
 sudo systemctl stop patroni etcd postgresql || true
@@ -17,6 +17,8 @@ sudo systemctl disable percona-patroni || true
 echo "Removing Percona PostgreSQL and related packages..."
 sudo apt remove -y percona-postgresql-17 python3-pip python3-dev binutils \
   percona-patroni etcd etcd-server etcd-client percona-pgbackrest gnupg2 lsb-release
+# sudo apt remove -y percona-postgresql-17 python3-pip python3-dev binutils \
+#   percona-patroni percona-pgbackrest gnupg2 lsb-release
 
 # echo "Purging leftover configs for removed packages..."
 # sudo apt purge -y percona-postgresql-17 python3-pip python3-dev binutils \
@@ -29,6 +31,14 @@ DEBIAN_FRONTEND=noninteractive \
      percona-postgresql-17 python3-pip python3-dev binutils \
      percona-patroni etcd etcd-server etcd-client percona-pgbackrest \
      gnupg2 lsb-release
+
+# DEBIAN_FRONTEND=noninteractive \
+#      apt-get purge -y \
+#      -o Dpkg::Options::="--force-confdef" \
+#      -o Dpkg::Options::="--force-confold" \
+#      percona-postgresql-17 python3-pip python3-dev binutils \
+#      percona-patroni percona-pgbackrest \
+#      gnupg2 lsb-release
 
 echo "Removing Percona repository..."
 sudo apt remove -y percona-release || true

@@ -1,5 +1,5 @@
 - name: reset standalone postgres_sql cluster
-  hosts: postgres_sql_nodes
+  hosts: db_nodes
 
   tasks:
     - name: uninstall

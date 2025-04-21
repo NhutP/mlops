@@ -1,5 +1,5 @@
 - name: get fact
-  hosts: postgres_sql_nodes
+  hosts: db_nodes
   gather_facts: yes
   tasks:
     - name: Confirm facts
@@ -29,7 +29,7 @@
 
 
 - name: setup standalone postgres_sql cluster
-  hosts: postgres_sql_nodes
+  hosts: db_nodes
 
   tasks:
     - name: install package script
@@ -57,7 +57,7 @@
     - name: execute install
       block:
       - name: permission
-        ansible.builtin.shell: "chmod +x /tmp/install_percona.sh"
+        ansible.builtin.shell: "chmod +x /tmp/install_percona.sh" #   && mkdir /var/lib/etcd_postgres"
         become: true
       - name: execute
         ansible.builtin.shell: "yes | /tmp/install_percona.sh"
@@ -78,5 +78,5 @@
       mode: '0644'
   
   - name: start ha proxy
-    ansible.builtin.shell: "apt install -y percona-haproxy && mv /tmp/haproxy.cfg /etc/haproxy && sudo systemctl restart haproxy"
+    ansible.builtin.shell: "apt install -y percona-haproxy && mv /tmp/haproxy.cfg /etc/haproxy && sudo systemctl restart haproxy && sudo systemctl enable haproxy"
     become: true

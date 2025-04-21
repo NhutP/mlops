@@ -1,0 +1,10 @@
+- name: set up percona posgres sql operator
+  hosts: master_nodes
+  become: yes
+
+  tasks:
+  - name: operator
+    ansible.builtin.shell: "kubectl create namespace postgres-operator && kubectl apply --server-side -f https://raw.githubusercontent.com/percona/percona-postgresql-operator/v2.5.1/deploy/bundle.yaml -n postgres-operator"
+  
+  - name: percona postgres
+    ansible.builtin.shell: ""

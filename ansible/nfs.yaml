@@ -1,0 +1,75 @@
+---
+- name: Configure NFS server
+  hosts: nfs_server
+  become: yes
+  tasks:
+    - name: Check if nfs-kernel-server is installed
+      command: dpkg -s nfs-kernel-server
+      register: nfs_server_check
+      changed_when: false
+      failed_when: false
+
+    - name: Install NFS server packages if not present
+      apt:
+        name: nfs-kernel-server
+        state: present
+        update_cache: yes
+      when: nfs_server_check.rc != 0
+
+    - name: Create shared directory
+      file:
+        path: /srv/nfs/shared
+        state: directory
+        owner: nobody
+        group: nogroup
+        mode: '0755'
+
+    - name: Update /etc/exports for each client
+      lineinfile:
+        path: /etc/exports
+        create: yes
+        line: "/srv/nfs/shared {{ item }}(rw,sync,no_subtree_check)"
+      loop: "{{ groups['nfs_clients'] | map('extract', hostvars, 'ansible_host') | list }}"
+
+    - name: Export NFS shares
+      command: exportfs -ra
+
+    - name: Enable and start NFS server
+      service:
+        name: nfs-kernel-server
+        state: started
+        enabled: yes
+
+    - name: change ownership
+      ansible.builtin.shell: "chown -R 999:999 /srv/nfs/shared"
+
+- name: Configure NFS clients
+  hosts: nfs_clients
+  become: yes
+  tasks:
+    - name: Check if nfs-common is installed
+      command: dpkg -s nfs-common
+      register: nfs_client_check
+      changed_when: false
+      failed_when: false
+
+    - name: Install NFS client packages if not present
+      apt:
+        name: nfs-common
+        state: present
+        update_cache: yes
+      when: nfs_client_check.rc != 0
+
+    - name: Create mount directory
+      file:
+        path: /mnt/nfs/shared
+        state: directory
+        mode: '0755'
+
+    - name: Mount NFS share
+      mount:
+        path: /mnt/nfs/shared
+        # We pick the first (and only) server host from nfs_server group:
+        src: "{{ hostvars[ groups['nfs_server'] | first ].ansible_host }}:/srv/nfs/shared"
+        fstype: nfs
+        state: mounted

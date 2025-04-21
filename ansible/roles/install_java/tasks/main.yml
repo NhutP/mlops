@@ -1,0 +1,38 @@
+---
+- name: Check if Java is installed
+  command: java -version
+  register: java_check
+  ignore_errors: yes
+  changed_when: false  # Prevents unnecessary "changed" status
+
+- name: Install Java if not available
+  block:
+    - name: Install OpenJDK if Java is not installed (Ubuntu/Debian)
+      ansible.builtin.apt:
+        name: openjdk-11-jdk
+        state: present
+        update_cache: yes
+
+    - name: Find Java installation path
+      shell: readlink -f $(which java) | xargs dirname | xargs dirname
+      register: java_path
+
+    - name: Set JAVA_HOME in /etc/environment
+      lineinfile:
+        path: /etc/environment
+        line: 'JAVA_HOME={{ java_path.stdout }}'
+        create: yes
+
+    - name: Apply environment changes
+      shell: source /etc/environment
+      args:
+        executable: /bin/bash
+
+    - name: Verify Java installation
+      command: java -version
+      register: java_final_check
+      changed_when: false
+
+    - debug:
+        msg: "Java is successfully installed at {{ java_path.stdout }}"
+  when: java_check.rc != 0

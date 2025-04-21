@@ -1,6 +1,11 @@
 #!/bin/bash
 
+# dpkg --configure -a
+
 apt update
+
+apt install curl
+
 curl -O https://repo.percona.com/apt/percona-release_latest.generic_all.deb
 apt install gnupg2 lsb-release ./percona-release_latest.generic_all.deb
 apt update
@@ -15,6 +20,18 @@ systemctl stop {etcd,patroni,postgresql}
 systemctl disable {etcd,patroni,postgresql}
 systemctl stop postgresql
 rm -rf /var/lib/postgresql/17/main
+
+########################
+
+touch /etc/tmpfiles.d/postgresql.conf
+echo "d /var/run/postgresql 0775 postgres postgres -" > /etc/tmpfiles.d/postgresql.conf
+
+## second way
+#sudo nano /etc/systemd/system/patroni.service
+#ExecStartPre=/bin/mkdir -p /var/run/postgresql
+#ExecStartPre=/bin/chown postgres:postgres /var/run/postgresql
+#ExecStartPre=/bin/chmod 775 /var/run/postgresql
+
 
 ########################
 mv /tmp/etcd.conf.yaml /etc/etcd

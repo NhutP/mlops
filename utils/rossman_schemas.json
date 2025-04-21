@@ -1,0 +1,67 @@
+{
+  "Record": {
+    "type": "record",
+    "name": "Record",
+    "fields": [
+      { "name": "store",           "type": ["null", "string"] },
+      { "name": "dayOfWeek",       "type": ["null", "string"] },
+      { "name": "date",            "type": ["null", "string"] },
+      { "name": "sales",           "type": ["null", "string"] },
+      { "name": "customers",       "type": ["null", "string"] },
+      { "name": "open",            "type": ["null", "string"] },
+      { "name": "promo",           "type": ["null", "string"] },
+      { "name": "schoolHoliday",   "type": ["null", "string"] },
+      { "name": "stateHoliday",    "type": ["null", "string"] }
+    ]
+  },
+
+  "Store": {
+    "type": "record",
+    "name": "Store",
+    "fields": [
+      { "name": "store",                    "type": ["null", "string"] },
+      { "name": "storeType",                "type": ["null", "string"] },
+      { "name": "assortment",               "type": ["null", "string"] },
+      { "name": "competitionDistance",      "type": ["null", "string"] },
+      { "name": "competitionOpenSinceMonth","type": ["null", "string"] },
+      { "name": "competitionOpenSinceYear", "type": ["null", "string"] },
+      { "name": "promo2",                   "type": ["null", "string"] },
+      { "name": "promo2SinceWeek",          "type": ["null", "string"] },
+      { "name": "promo2SinceYear",          "type": ["null", "string"] },
+      { "name": "promoInterval",            "type": ["null", "string"] },
+      { "name": "storeState",               "type": ["null", "string"] }
+    ]
+  },
+
+  "Weather": {
+  "type": "record",
+  "name": "Weather",
+  "fields": [
+      { "name": "date",                        "type": ["null", "string"] },
+      { "name": "maxTemperatureC",             "type": ["null", "string"] },
+      { "name": "meanTemperatureC",            "type": ["null", "string"] },
+      { "name": "minTemperatureC",             "type": ["null", "string"] },
+      { "name": "dewPointC",                   "type": ["null", "string"] },
+      { "name": "meanDewPointC",               "type": ["null", "string"] },
+      { "name": "minDewpointC",                "type": ["null", "string"] },
+      { "name": "maxHumidity",                 "type": ["null", "string"] },
+      { "name": "meanHumidity",                "type": ["null", "string"] },
+      { "name": "minHumidity",                 "type": ["null", "string"] },
+      { "name": "maxSeaLevelPressurehPa",      "type": ["null", "string"] },
+      { "name": "meanSeaLevelPressurehPa",     "type": ["null", "string"] },
+      { "name": "minSeaLevelPressurehPa",      "type": ["null", "string"] },
+      { "name": "maxVisibilityKm",             "type": ["null", "string"] },
+      { "name": "meanVisibilityKm",            "type": ["null", "string"] },
+      { "name": "minVisibilityKm",             "type": ["null", "string"] },
+      { "name": "maxWindSpeedKmH",             "type": ["null", "string"] },
+      { "name": "meanWindSpeedKmH",            "type": ["null", "string"] },
+      { "name": "maxGustSpeedKmH",             "type": ["null", "string"] },
+      { "name": "precipitationMm",             "type": ["null", "string"] },
+      { "name": "cloudCover",                  "type": ["null", "string"] },
+      { "name": "events",                      "type": ["null", "string"] },
+      { "name": "windDirDegrees",              "type": ["null", "string"] },
+      { "name": "state",                       "type": ["null", "string"] }
+    ]
+  }
+}
+
