@@ -12,9 +12,6 @@ pipeline {
             //     BUILD_VERSION = "${params.BUILD_VERSION}"
             // }
             steps {
-                sh 'echo $BUILD_VERSION'
-                sh 'echo -------'
-                sh 'printenv | grep BUILD_VERSION'
                 checkout scm
                 sh 'docker build -t nhutp/train_xgboost_normal:latest ./model/train_xgboost'
                 sh 'docker tag nhutp/train_xgboost_normal:latest nhutp/train_xgboost_normal:$BUILD_VERSION'
@@ -34,7 +31,7 @@ pipeline {
                 checkout scm
 
                 script {
-                    def yamlTemplate = readFile 'jenkins/katib-experiment.yaml'
+                    def yamlTemplate = readFile './k8s_manifest/xg_boost_train_normal_job.yaml'
                     def replacedYaml = yamlTemplate
                         .replace('__EXPERIMENT_ID__', "${EXPERIMENT_ID}")
 
