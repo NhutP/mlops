@@ -31,11 +31,11 @@ pipeline {
                     def replacedYaml = yamlTemplate
                         .replace('__EXPERIMENT_ID__', "${EXPERIMENT_ID}")
 
-                    writeFile file: './k8s_manifest/generated-xg-boost-katib-${params.EXPERIMENT_ID}.yaml', text: replacedYaml
+                    writeFile file: "./k8s_manifest/generated-xg-boost-katib-${params.EXPERIMENT_ID}.yaml", text: replacedYaml
                 }
                 
                 // sh 'sudo kubectl apply -f ./k8s_manifest/xg_boost_train_normal_job.yaml'
-                sh 'sudo kubectl apply -f ./k8s_manifest/generated-xg-boost-katib-${params.EXPERIMENT_ID}.yaml'
+                sh "sudo kubectl apply -f ./k8s_manifest/generated-xg-boost-katib-${params.EXPERIMENT_ID}.yaml"
             }
         }
 
