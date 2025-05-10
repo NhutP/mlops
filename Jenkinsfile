@@ -19,7 +19,7 @@ pipeline {
             agent { label 'k8s_master' }
             steps {
                 checkout scm
-                sh 'sudo kubectl apply -f ./k8s_manifest/xgboost_train_normal.yaml'
+                sh 'sudo kubectl apply -f ./k8s_manifest/xg_boost_train_normal_job.yaml'
             }
         }
 
