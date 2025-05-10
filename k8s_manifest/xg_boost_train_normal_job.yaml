@@ -74,8 +74,8 @@ spec:
                     value: "${trialParameters.GEN_NUM_ROUND}"
                   - name: TRIAL_NAME
                     value: "${trialParameters.TRIAL_NAME}"
-                resources:
-                  limits:
-                    memory: "256Mi"
-                    cpu: "300m"
+                # resources:
+                #   limits:
+                #     memory: "256Mi"
+                #     cpu: "300m"
             restartPolicy: Never
