@@ -13,6 +13,8 @@ pipeline {
             // }
             steps {
                 sh 'echo $BUILD_VERSION'
+                sh 'echo -------'
+                sh 'printenv | grep BUILD_VERSION'
                 checkout scm
                 sh 'docker build -t nhutp/train_xgboost_normal:latest ./model/train_xgboost'
                 sh 'docker tag nhutp/train_xgboost_normal:latest nhutp/train_xgboost_normal:$BUILD_VERSION'
@@ -27,6 +29,8 @@ pipeline {
             }
             steps {
                 sh 'echo $EXPERIMENT_ID'
+                sh 'echo -------'
+                sh 'printenv | grep EXPERIMENT_ID'
                 checkout scm
 
                 script {
