@@ -1,7 +1,7 @@
 apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
-  name: xgboost-hpo
+  name: xgboost-hpo-__EXPERIMENT_ID__
   namespace: kubeflow
 spec:
   objective:
@@ -39,8 +39,6 @@ spec:
 
   trialTemplate:
     primaryContainerName: train-container
-    # successCondition: status.conditions.#(type=="Complete")#|#(status=="True")#
-    # failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
 
     trialParameters:
       - name: GEN_LEARNING_RATE
@@ -74,8 +72,5 @@ spec:
                     value: "${trialParameters.GEN_NUM_ROUND}"
                   - name: TRIAL_NAME
                     value: "${trialParameters.TRIAL_NAME}"
-                # resources:
-                #   limits:
-                #     memory: "256Mi"
-                #     cpu: "300m"
+
             restartPolicy: Never
