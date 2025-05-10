@@ -34,7 +34,7 @@ pipeline {
                     writeFile file: "./k8s_manifest/generated-xg-boost-katib-${params.EXPERIMENT_ID}.yaml", text: replacedYaml
                 }
                 
-                sh 'sudo kubectl apply -f ./k8s_manifest/generated-xg-boost-katib-${parmas.EXPERIMENT_ID}.yaml'
+                sh "sudo kubectl apply -f ./k8s_manifest/generated-xg-boost-katib-${parmas.EXPERIMENT_ID}.yaml"
             }
         }
 
