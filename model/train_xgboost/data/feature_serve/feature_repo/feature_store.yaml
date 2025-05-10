@@ -1,0 +1,13 @@
+# feature_store.yaml
+project: rossmann_project
+registry: registry.db
+provider: local
+offline_store:
+  type: postgres
+  # host: 192.168.1.110
+  host: external-postgres.default.svc.cluster.local
+  port: 5000
+  database: rossman
+  db_schema: public
+  user: postgres
+  password: qaz123
