@@ -9,7 +9,7 @@ pipeline {
         stage('build training image') {
             agent { label 'docker' }
             // environment{
-            //     BUILD_VERSION = ${params.BUILD_VERSION}
+            //     BUILD_VERSION = "${params.BUILD_VERSION}"
             // }
             steps {
                 sh 'echo $BUILD_VERSION'
@@ -23,7 +23,7 @@ pipeline {
         stage('Start training') {
             agent { label 'k8s_master' }
              environment {
-                EXPERIMENT_ID = ${params.EXPERIMENT_ID}
+                EXPERIMENT_ID = "${params.EXPERIMENT_ID}"
             }
             steps {
                 sh 'echo $EXPERIMENT_ID'
