@@ -3,7 +3,7 @@ import os
 import socket
 import numpy as np
 import xgboost as xgb
-from get_dataset import retrieve_training_data
+from model.train_hypertune.get_dataset import retrieve_training_data
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 

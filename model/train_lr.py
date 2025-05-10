@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error
 
-from get_dataset import retrieve_training_data  # ← import data function
+from model.train_hypertune.get_dataset import retrieve_training_data  # ← import data function
 
 def setup():
     dist.init_process_group(backend="gloo", init_method="env://")

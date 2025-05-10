@@ -6,7 +6,7 @@ import mlflow
 import mlflow.xgboost
 from datetime import datetime
 
-from get_dataset import retrieve_training_data
+from model.train_hypertune.get_dataset import retrieve_training_data
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
