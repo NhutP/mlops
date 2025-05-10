@@ -12,7 +12,7 @@ all:
           ansible_host: 192.168.1.116
 
       vars:
-        ansible_ssh_private_key_file: /home/nhutpham/.ssh/worker_key
+        ansible_ssh_private_key_file: /home/nhut/.ssh/worker_key
         ansible_user: nhut
         
     weak_machine:
@@ -20,7 +20,7 @@ all:
         master_machine:
           ansible_host: 192.168.1.110
       vars:
-        ansible_ssh_private_key_file: /home/nhutpham/.ssh/master_key
+        ansible_ssh_private_key_file: /home/nhut/.ssh/master_key
         ansible_user: nhut
 
   hosts:

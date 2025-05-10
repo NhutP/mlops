@@ -1,0 +1,77 @@
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  name: xgboost-hpo
+  namespace: kubeflow
+spec:
+  objective:
+    type: minimize
+    goal: 0.15  # Example target RMSPE
+    objectiveMetricName: RMSPE
+
+  algorithm:
+    algorithmName: random
+
+  metricsCollectorSpec:
+    collector:
+      kind: StdOut
+
+  parallelTrialCount: 1
+  maxTrialCount: 4
+  maxFailedTrialCount: 3
+  parameters:
+    - name: LEARNING_RATE
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.3"
+    - name: MAX_DEPTH
+      parameterType: int
+      feasibleSpace:
+        min: "3"
+        max: "10"
+    - name: NUM_ROUND
+      parameterType: int
+      feasibleSpace:
+        min: "30"
+        max: "100"
+  trialTemplate:
+    primaryContainerName: train-container
+    successCondition: status.conditions.#(type=="Succeeded")#|#(status=="True")#
+    failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
+
+    trialParameters:
+      - name: GEN_LEARNING_RATE
+        description: Learning rate
+        reference: LEARNING_RATE  # Reference the experiment parameter genereted from 
+      - name: GEN_MAX_DEPTH
+        description: Max depth
+        reference: MAX_DEPTH  # Reference the experiment parameter
+      - name: GEN_NUM_ROUND
+        description: Number of boosting rounds
+        reference: NUM_ROUND  # Reference the experiment parameter genereted from 
+      - name: TRIAL_NAME
+        description: trial name
+        reference: "${trialSpec.Name}" # Reference metadata from the trial spec
+
+    trialSpec:
+      apiVersion: kubeflow.org/v1
+      kind: Pod
+      spec:
+        containers:
+        - name: train-container
+          image: nhutp/train_xgboost_normal:latest
+          env:
+            - name: LEARNING_RATE
+              value: "${trialParameters.GEN_LEARNING_RATE}"
+            - name: MAX_DEPTH
+              value: "${trialParameters.GEN_MAX_DEPTH}"
+            - name: NUM_ROUND
+              value: "${trialParameters.GEN_NUM_ROUND}"
+            - name: TRIAL_NAME
+              value: "${trialParameters.TRIAL_NAME}"
+          # command: ["sh", "-c", "while true; do echo hello; sleep 10; done"]
+          # resources:
+          #   limits:
+          #     memory: "64Mi"
+          #     cpu: "250m"
