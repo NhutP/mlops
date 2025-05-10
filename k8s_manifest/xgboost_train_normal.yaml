@@ -71,7 +71,7 @@ spec:
             - name: TRIAL_NAME
               value: "${trialParameters.TRIAL_NAME}"
           # command: ["sh", "-c", "while true; do echo hello; sleep 10; done"]
-          # resources:
-          #   limits:
-          #     memory: "64Mi"
-          #     cpu: "250m"
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
