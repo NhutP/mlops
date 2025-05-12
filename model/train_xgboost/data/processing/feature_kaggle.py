@@ -11,7 +11,7 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 # PostgreSQL connection parameters
-jdbc_url = "jdbc:postgresql://192.168.1.110:5000/rossman"
+jdbc_url = "jdbc:postgresql://192.168.1.110:5000/rossman?sslmode=disable"
 conn_props = {
     "user": "postgres",
     "password": "qaz123",
@@ -228,9 +228,9 @@ final_df = df.select(*final_cols)
 # ----------------------------
 # 15. Write Final Features to PostgreSQL
 # ----------------------------
-final_df.write.format("jdbc") \
+final_df.coalesce(5).write.format("jdbc") \
     .option("url", jdbc_url) \
-    .option("dbtable", "record_features_all") \
+    .option("dbtable", "new_record_features_all") \
     .option("user", conn_props["user"]) \
     .option("password", conn_props["password"]) \
     .option("driver", conn_props["driver"]) \

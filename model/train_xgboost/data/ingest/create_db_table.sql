@@ -38,6 +38,20 @@ CREATE TABLE IF NOT EXISTS Record (
     event_timestamp TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS ProcessedRecord (
+    id SERIAL PRIMARY KEY,
+    store VARCHAR(10) NOT NULL,
+    dayOfWeek INT,
+    "date"  DATE,
+    sales INT,
+    customers INT,
+    "open" BOOLEAN,
+    promo BOOLEAN,
+    schoolHoliday BOOLEAN,
+    stateHoliday CHAR(1),
+    event_timestamp TIMESTAMP DEFAULT NOW()
+);
+
 -- ALTER TABLE record_features_all
 -- ALTER COLUMN "date" TYPE TEXT USING TO_CHAR("date", 'YYYY-MM-DD');
 

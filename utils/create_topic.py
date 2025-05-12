@@ -3,7 +3,6 @@ from confluent_kafka import KafkaException
 
 # Kafka Configuration
 KAFKA_BROKER = "192.168.1.110:9092,192.168.1.111:9092"  # Change this to your Kafka broker
-TOPIC_NAME = "Movie"  # The topic you want to check/create
 
 # Initialize Kafka Admin Client
 admin_client = AdminClient({"bootstrap.servers": KAFKA_BROKER})

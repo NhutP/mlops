@@ -109,7 +109,7 @@ if __name__ == "__main__":
     KAFKA_BROKER = "192.168.1.110:9092,192.168.1.111:9092"
     SCHEMA_REGISTRY_URL = "http://192.168.1.110:8081"
     TOPIC_NAME = "Store"          # Kafka topic name
-    GROUP_ID = "ttt"         # Consumer group name
+    GROUP_ID = "12345678uio"         # Consumer group name
 
     # You can specify a schema subject or let it default to "<topic>-value".
     schema_subject = "Store-value"  # Optional; defaults to "Movie-value" if not provided
@@ -117,10 +117,11 @@ if __name__ == "__main__":
     # Create an instance of the consumer.
     consumer = KafkaAvroConsumer(KAFKA_BROKER, SCHEMA_REGISTRY_URL, TOPIC_NAME, GROUP_ID, schema_subject)
     
-    # Read and print all messages from the topic.
-    for key, value in consumer.read_all_messages():
-        print(f"✅ Received message: Key={key}, Value={value}")
-        print(value)
-        print(type(value))
-        print('----------------------------')
-        input("Press Enter to fetch the next message...")
+    # # Read and print all messages from the topic.
+    # for key, value in consumer.read_all_messages():
+    #     print(f"✅ Received message: Key={key}, Value={value}")
+    #     print(value)
+    #     print(type(value))
+    #     print('----------------------------')
+    #     input("Press Enter to fetch the next message...")
+    print(consumer.read_batch(200))

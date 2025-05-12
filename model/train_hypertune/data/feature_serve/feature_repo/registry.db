@@ -1,72 +1,0 @@
-
-G
-'
-__dummy"
-__dummy_idJrossmann_project
-ÌÂ®øÄ‡–•ÌÂ®øÄ‡–•
-U
-5
-idUnique store identifier"idJrossmann_project
-ÌÂ®øà‡›•ÌÂ®øà‡›•1"$fb508679-48f3-4112-9168-158b0bd8943a*ÌÂ®øè§¶2í
-
-Ò	
-allfeatures_viewrossmann_projectid"
-	storetype"
-
-assortment"
-shopavg_open"
-shopavg_salespercustomer"
-shopavg_schoolholiday"
-shopsales_holiday"
-shopsales_promo"
-shopsales_saturday"
-day"
-	dayofweek"
-	dayofyear"	
-month"
-week"
-year"
-dayavg_openyesterday"
-
-Promo2"
-Promo2SinceWeek"
-Promo2SinceYear"
-daysinpromocycle"
-primpromocycle"	
-promo"
-promointerval"
-CompetitionDistance"
-CompetitionOpenSinceMonth"
-CompetitionOpenSinceYear"
-daysincompetition"
-daysincompetition_unrounded"
-rnd_CompetitionDistance"
-schoolholiday"
-stateholiday"
-holidays_lastweek"
-holidays_nextweek"
-holidays_thisweek"
-prevquarter_dps_med"
-prevhalfyear"
-prevyear_med"
-prevquarter_cust_dps_med"
-prevyear_cust_dps_med"
-lastmonth_yoy"
-linmod_quarterly"
-linmod_yearly"
-weather_maxtemp"
-weather_precip"
-relativeweather_maxtemp"
-relativeweather_precip"
-closurefeat"	
-sales2Äà≤†:Âevent_timestampÇU
-S{"name": "record_features_all_source", "query": "", "table": "record_features_all"}äZfeast.infra.offline_stores.contrib.postgres_offline_store.postgres_source.PostgreSQLSource¢record_features_all_sourceb
-id
-ÌÂ®ø∏©Í•ÌÂ®ø∏©Í•RØ
-¨
-,feast.infra.online_stores.sqlite.SqliteTable"|
-W/mnt/c/Users/quang/Desktop/project/model/data/feature_serve/feature_repo/data/online.db!rossmann_project_allfeatures_viewb¯event_timestampÇU
-S{"name": "record_features_all_source", "query": "", "table": "record_features_all"}äZfeast.infra.offline_stores.contrib.postgres_offline_store.postgres_source.PostgreSQLSource¢record_features_all_source™rossmann_projectä2
-
-rossmann_project
-ÌÂ®øË∑ ŸÌÂ®øË∑ Ÿ

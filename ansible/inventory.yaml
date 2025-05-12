@@ -63,7 +63,7 @@ spark_nodes:
         machine4:
       vars:
         cores: 1
-        mem: 3G
+        mem: 2G
 
 ##############################################################
 kafka_nodes:

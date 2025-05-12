@@ -11,10 +11,10 @@
   hosts: kafka_brokers
   
   tasks:
-  - name: remove data folder
-    ansible.builtin.shell: "rm -r /var/lib/kafka/data"
-    become: true
-    ignore_errors: yes
+  # - name: remove data folder
+  #   ansible.builtin.shell: "rm -r /var/lib/kafka/data"
+  #   become: true
+  #   ignore_errors: yes
   
   - name: kafka stop server
     ansible.builtin.shell: "cd ~/confluent-7.9.0 && ./bin/kafka-server-stop"
