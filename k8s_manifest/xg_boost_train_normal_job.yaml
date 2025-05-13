@@ -17,7 +17,7 @@ spec:
       kind: StdOut
 
   parallelTrialCount: 1
-  maxTrialCount: 4
+  maxTrialCount: 1
   maxFailedTrialCount: 3
 
   parameters:

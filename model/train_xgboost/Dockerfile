@@ -22,7 +22,8 @@ RUN pip install --no-cache-dir \
     sqlalchemy \
     psycopg2-binary \
     feast \
-    feast[postgres]
+    feast[postgres] \
+    mlflow
 
 # Expose tracker port (default for Rabit)
 EXPOSE 9091

@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 
 
 def retrieve_training_data():
-  engine = create_engine("postgresql://postgres:qaz123@192.168.1.110:5000/rossman")
+  engine = create_engine("postgresql://postgres:qaz123@external-postgres.default.svc.cluster.local:5000/rossman")
   # engine = create_engine("postgresql://postgres:qaz123@external-postgres.default.svc.cluster.local:5000/rossman")
     
   # 2. Define a SQL query to extract all distinct entity keys (and a suitable event timestamp)

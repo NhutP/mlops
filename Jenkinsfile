@@ -38,5 +38,47 @@ pipeline {
             }
         }
 
+        stage('Wait for Katib Completion') {
+            steps {
+                sh '''
+                # Wait until experiment finished (simplified polling)
+                for i in {1..60}; do
+                    status=$(kubectl get experiment xgboost-hpo-${EXPERIMENT_ID} -n kubeflow -o jsonpath='{.status.conditionTypes[0]}')
+                    if [ "$status" = "Succeeded" ]; then
+                        break
+                    fi
+                    sleep 10
+                done
+                '''
+            }
+        }
+
+        stage('Get Best Hyperparameters') {
+            steps {
+                script {
+                    def bestParamsJson = sh(script: "kubectl get experiment xgboost-hpo-${EXPERIMENT_ID} -n kubeflow -o json | jq '.status.currentOptimalTrial.parameterAssignments'", returnStdout: true).trim()
+                    def bestParams = readJSON text: bestParamsJson
+
+                    env.LEARNING_RATE = bestParams.find { it.name == "LEARNING_RATE" }.value
+                    env.MAX_DEPTH     = bestParams.find { it.name == "MAX_DEPTH" }.value
+                    env.NUM_ROUND     = bestParams.find { it.name == "NUM_ROUND" }.value
+                }
+
+                script {
+                  
+                    def jobYaml = readFile('final_training_job.yaml')
+
+                    jobYaml = jobYaml.replaceAll("__OPT_LEARNING_RATE__", env.LEARNING_RATE)
+                    jobYaml = jobYaml.replaceAll("__OPT_MAX_DEPTH__", env.MAX_DEPTH)
+                    jobYaml = jobYaml.replaceAll("__OPT_NUM_ROUND__", env.NUM_ROUND)
+                    jobYaml = jobYaml.replaceAll("__MODEL_VERSION__", "${params.EXPERIMENT_ID}")
+                    jobYaml = jobYaml.replaceAll("__EXPERIMENT_ID__", "${EXPERIMENT_ID}")
+
+                    writeFile file: 'generated_final_training_job_${params.EXPERIMENT_ID}.yaml', text: jobYaml
+                }
+
+                // sh "sudo kubectl apply -f ./k8s_manifest/generated-xg-boost-katib-${env.EXPERIMENT_ID}.yaml"
+            }
+        }
     }
 }
