@@ -17,8 +17,8 @@ spec:
       kind: StdOut
 
   parallelTrialCount: 1
-  maxTrialCount: 1
-  maxFailedTrialCount: 3
+  maxTrialCount: 2
+  maxFailedTrialCount: 1
 
   parameters:
     - name: LEARNING_RATE
