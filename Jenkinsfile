@@ -1,6 +1,10 @@
 pipeline {
     agent { label 'builtin' }
 
+    environment {
+        KUBECONFIG = "${params.KUBE_CONFIG}"  // Specify the path to your kubeconfig file
+    }
+
     parameters {
         string(name: 'BUILD_VERSION', defaultValue: '0.0.0', description: 'build version')
         string(name: 'EXPERIMENT_ID', defaultValue: '0000', description: 'katib experiment version')
