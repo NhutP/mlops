@@ -73,4 +73,10 @@ spec:
                   - name: TRIAL_NAME
                     value: "${trialParameters.TRIAL_NAME}"
 
+                resources:
+                  requests:
+                    cpu: "500m"                   
+                    memory: "512Mi"                
+                    ephemeral-storage: "3Gi"
+
             restartPolicy: Never
