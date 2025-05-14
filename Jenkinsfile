@@ -28,7 +28,8 @@ pipeline {
             }
             steps {
                 checkout scm
-
+                sh 'whoami'
+                
                 script {
                     def yamlTemplate = readFile './k8s_manifest/xg_boost_train_normal_job.yaml'
                     def replacedYaml = yamlTemplate
