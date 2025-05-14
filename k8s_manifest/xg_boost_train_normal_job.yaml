@@ -17,8 +17,8 @@ spec:
       kind: StdOut
 
   parallelTrialCount: 1
-  maxTrialCount: 4
-  maxFailedTrialCount: 3
+  maxTrialCount: 2
+  maxFailedTrialCount: 1
 
   parameters:
     - name: LEARNING_RATE
@@ -72,5 +72,11 @@ spec:
                     value: "${trialParameters.GEN_NUM_ROUND}"
                   - name: TRIAL_NAME
                     value: "${trialParameters.TRIAL_NAME}"
+
+                resources:
+                  requests:
+                    cpu: "500m"                   
+                    memory: "512Mi"                
+                    ephemeral-storage: "3Gi"
 
             restartPolicy: Never

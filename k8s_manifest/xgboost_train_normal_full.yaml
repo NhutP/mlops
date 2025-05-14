@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: train-final-xgboost-__EXPERIMENT_ID__
+
+spec:
+  template:
+    spec:
+      containers:
+        - name: train-container
+          image: nhutp/train_xgboost_normal:latest
+          env:
+            - name: LEARNING_RATE
+              value: "__OPT_LEARNING_RATE__"
+            - name: MAX_DEPTH
+              value: "__OPT_MAX_DEPTH__"
+            - name: NUM_ROUND
+              value: "__OPT_NUM_ROUND__"
+
+            - name: MODEL_VERSION
+              value: "__MODEL_VERSION__"
+            - name: FINAL_MODEL
+              value: yes
+
+      restartPolicy: OnFailure
