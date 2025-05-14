@@ -29,7 +29,7 @@ pipeline {
             steps {
                 checkout scm
                 sh 'whoami'
-                
+
                 script {
                     def yamlTemplate = readFile './k8s_manifest/xg_boost_train_normal_job.yaml'
                     def replacedYaml = yamlTemplate
@@ -47,7 +47,7 @@ pipeline {
                 sh '''
                 # Wait until experiment finished (simplified polling)
                 for i in {1..600}; do
-                    status=$(kubectl get experiment xgboost-hpo-${EXPERIMENT_ID} -n kubeflow -o jsonpath='{.status.conditionTypes[0]}')
+                    status=$(kubectl get experiment xgboost-hpo-${EXPERIMENT_ID} -n kubeflow -o jsonpath='{.status.conditions[0].type}')
                     if [ "$status" = "Succeeded" ]; then
                         break
                     fi
