@@ -19,7 +19,6 @@ pipeline {
         }
         
         stage('Start training') {
-            agent { label 'k8s_master' }
              environment {
                 EXPERIMENT_ID = "${params.EXPERIMENT_ID}"
             }
@@ -34,15 +33,15 @@ pipeline {
                     writeFile file: "./k8s_manifest/generated-xg-boost-katib-${params.EXPERIMENT_ID}.yaml", text: replacedYaml
                 }
                 
-                sh "sudo kubectl apply -f ./k8s_manifest/generated-xg-boost-katib-${env.EXPERIMENT_ID}.yaml"
+                sh "kubectl apply -f ./k8s_manifest/generated-xg-boost-katib-${env.EXPERIMENT_ID}.yaml"
             }
         }
-
+    
         stage('Wait for Katib Completion') {
             steps {
                 sh '''
                 # Wait until experiment finished (simplified polling)
-                for i in {1..60}; do
+                for i in {1..600}; do
                     status=$(kubectl get experiment xgboost-hpo-${EXPERIMENT_ID} -n kubeflow -o jsonpath='{.status.conditionTypes[0]}')
                     if [ "$status" = "Succeeded" ]; then
                         break
@@ -77,7 +76,7 @@ pipeline {
                     writeFile file: 'generated_final_training_job_${params.EXPERIMENT_ID}.yaml', text: jobYaml
                 }
 
-                // sh "sudo kubectl apply -f ./k8s_manifest/generated-xg-boost-katib-${env.EXPERIMENT_ID}.yaml"
+                sh "kubectl apply -f ./k8s_manifest/generated-xg-boost-katib-${env.EXPERIMENT_ID}.yaml"
             }
         }
     }

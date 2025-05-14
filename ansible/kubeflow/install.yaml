@@ -8,18 +8,18 @@
       - name: "install katib"
         ansible.builtin.shell: "kubectl apply -k github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.17.0"
   
-  # - name: kubeflow pipeline
-  #   vars:
-  #     PIPELINE_VERSION : "2.3.0"
-  #   block: 
-  #     - name: "apply 1"
-  #       ansible.builtin.shell: "kubectl apply -k github.com/kubeflow/pipelines/manifests/kustomize/cluster-scoped-resources?ref={{PIPELINE_VERSION}}"
+  - name: kubeflow pipeline
+    vars:
+      PIPELINE_VERSION : "2.3.0"
+    block: 
+      - name: "apply 1"
+        ansible.builtin.shell: "kubectl apply -k github.com/kubeflow/pipelines/manifests/kustomize/cluster-scoped-resources?ref={{PIPELINE_VERSION}}"
 
-  #     - name: "wait"
-  #       ansible.builtin.shell: "kubectl wait --for condition=established --timeout=60s crd/applications.app.k8s.io --warnings-as-errors"
+      - name: "wait"
+        ansible.builtin.shell: "kubectl wait --for condition=established --timeout=60s crd/applications.app.k8s.io --warnings-as-errors"
 
-  #     - name: "apply 2" 
-  #       ansible.builtin.shell: "kubectl apply -k github.com/kubeflow/pipelines/manifests/kustomize/env/dev?ref={{PIPELINE_VERSION}}"
+      - name: "apply 2" 
+        ansible.builtin.shell: "kubectl apply -k github.com/kubeflow/pipelines/manifests/kustomize/env/dev?ref={{PIPELINE_VERSION}}"
 
   - name: model registry
     vars: 
@@ -36,5 +36,5 @@
       - name: "apply"
         ansible.builtin.shell: "kubectl apply --server-side -k github.com/kubeflow/training-operator.git/manifests/overlays/standalone?ref=v1.8.1"
   
-  # - name: install spark-operator
-  #   ansible.builtin.shell: "helm repo add spark-operator https://kubeflow.github.io/spark-operator && helm repo updatehelm install spark-operator spark-operator/spark-operator --namespace spark-operator --create-namespace"
+  - name: install spark-operator
+    ansible.builtin.shell: "helm repo add spark-operator https://kubeflow.github.io/spark-operator && helm repo updatehelm install spark-operator spark-operator/spark-operator --namespace spark-operator --create-namespace"
